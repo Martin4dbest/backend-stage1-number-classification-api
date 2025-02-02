@@ -1,81 +1,80 @@
-import requests
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import math
+import json
 
 app = Flask(__name__)
+CORS(app)
 
-# Function to get the fun fact about the number
-def get_fun_fact(number):
-    # Assuming you're using the Numbers API to fetch fun facts
-    url = f"http://numbersapi.com/{number}/math?json=true"
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        data = response.json()
-        
-        # Check if the number is Armstrong and manually override fun fact for Armstrong numbers
-        if number == 371:  # You can extend this logic for other Armstrong numbers
-            return "371 is an Armstrong number because 3^3 + 7^3 + 1^3 = 371"
-        
-        # If not Armstrong, return the general fun fact from the API
-        return data.get('text', "This is a number.")
-    else:
-        return "Fun fact not available."
-
-# Function to classify a number
-def classify_number(number):
-    # Check if the number is prime
-    def is_prime(n):
-        if n <= 1:
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
             return False
-        for i in range(2, int(n**0.5) + 1):
-            if n % i == 0:
-                return False
-        return True
+    return True
 
-    # Check if the number is perfect
-    def is_perfect(n):
-        divisors = [i for i in range(1, n) if n % i == 0]
-        return sum(divisors) == n
-    
-    # Check Armstrong number
-    def is_armstrong(n):
-        num_str = str(n)
-        length = len(num_str)
-        return sum(int(digit) ** length for digit in num_str) == n
-    
-    # Classify the number properties
+def is_perfect(n):
+    return sum([i for i in range(1, n) if n % i == 0]) == n
+
+def is_armstrong(n):
+    digits = [int(d) for d in str(n)]
+    return sum([d**len(digits) for d in digits]) == n
+
+@app.route('/')
+def home():
+    return "Welcome to the Number Classification API! Use /api/classify-number?number=<your_number> to classify a number."
+
+@app.route('/api/classify-number', methods=['GET'])
+def classify_number():
+    number = request.args.get('number')
+
+    # Check if the input is valid (a valid integer number)
+    if number is None or not number.lstrip('-').isdigit():
+        return jsonify({
+            "number": number,
+            "error": True
+        }), 400
+
+    number = int(number)
     properties = []
+    
+    # Classify the number based on different properties
+    if is_prime(number):
+        properties.append("prime")
+    if is_perfect(number):
+        properties.append("perfect")
     if is_armstrong(number):
         properties.append("armstrong")
     if number % 2 == 0:
         properties.append("even")
     else:
         properties.append("odd")
-    
-    return {
+
+    # Calculate the sum of digits
+    digit_sum = sum(int(digit) for digit in str(abs(number)))
+
+    # Fun fact for Armstrong numbers
+    fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(number)]) + f" = {number}" if is_armstrong(number) else "No fact found."
+
+    # Create the response dictionary manually in the correct order
+    response = {
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
-        "properties": properties,
-        "digit_sum": sum(int(digit) for digit in str(number)),
-        "fun_fact": get_fun_fact(number)
+        "properties": properties,  # In one line, as required
+        "digit_sum": digit_sum,
+        "fun_fact": fun_fact
     }
 
-# API route to classify number
-@app.route('/api/classify-number', methods=['GET'])
-def classify_number_route():
-    try:
-        number = int(request.args.get('number'))
-    except (TypeError, ValueError):
-        return jsonify({"error": "Invalid input. Please provide a valid number."}), 400
+    # Convert the response dictionary to JSON with json.dumps() to ensure the order of the keys
+    json_response = json.dumps(response, indent=4)
     
-    result = classify_number(number)
-    return jsonify(result), 200
-
-# Home route
-@app.route('/')
-def home():
-    return "Welcome to the Number Classification API! Use /api/classify-number?number=<your_number> to classify a number."
+    return app.response_class(
+        response=json_response,
+        status=200,
+        mimetype='application/json'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
