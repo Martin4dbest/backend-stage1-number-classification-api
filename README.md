@@ -64,8 +64,8 @@ This API is deployed on Render.
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/Martin4dbest/devops-stage1-number-classification-api
-cd devops-stage1-number-classification-api
+git clone https://github.com/Martin4dbest/backend-stage1-number-classification-api
+cd backend-stage1-number-classification-api
 
 
 ### Step 2: Install Dependencies
