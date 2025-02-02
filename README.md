@@ -3,9 +3,10 @@
 DevOps Stage 1 - Number Classification API
 
 ## Overview
-This API classifies numbers based on various mathematical properties and provides fun facts about the number. It is designed to help developers understand how to build, deploy, and interact with an API.
 
-The core functionality of the API includes classifying numbers based on whether they are prime, perfect, or Armstrong. Additionally, it provides a fun fact from the Numbers API and performs other checks like determining if a number is even or odd, and calculating the sum of its digits.
+The Number Classification API is a project created as part of my HNG Stage 2 DevOps task. This API is designed to classify numbers based on various mathematical properties, providing fun facts that make learning about numbers more engaging and interactive.
+
+As part of my journey in mastering DevOps, this project demonstrates my ability to build, deploy, and maintain a fully functional API. The core functionality of the API includes classifying numbers in several ways:
 
 ## Features
 The API supports the following functionality:
@@ -15,6 +16,8 @@ The API supports the following functionality:
 - **Even/Odd Check**: Determines if the number is even or odd.
 - **Sum of Digits Calculation**: Calculates the sum of the digits of the number.
 - **Fun Fact**: Fetches an interesting fact about the number from the Numbers API.
+
+Additionally, it provides a fun fact from the Numbers API and performs other checks like determining if a number is even or odd, and calculating the sum of its digits.
 
 ## API Usage
 
