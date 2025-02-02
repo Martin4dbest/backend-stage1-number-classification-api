@@ -64,7 +64,7 @@ def classify_number():
         "properties": properties,
         "digit_sum": f"{digit_sum}",  # return as string as requested
         "fun_fact": fun_fact
-    })
+    }), 200  # Explicitly setting status code to 200 for valid input
 
 if __name__ == '__main__':
     app.run(debug=True)
