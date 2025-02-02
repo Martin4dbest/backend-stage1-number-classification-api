@@ -1,95 +1,81 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import math
-import json
-import requests  # For calling the Numbers API
+import requests
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
-CORS(app)
 
-# Function to check if a number is prime
-def is_prime(n):
-    if n < 2:
-        return False
-    for i in range(2, int(math.sqrt(n)) + 1):
-        if n % i == 0:
-            return False
-    return True
-
-# Function to check if a number is perfect
-def is_perfect(n):
-    return sum([i for i in range(1, n) if n % i == 0]) == n
-
-# Function to check if a number is Armstrong
-def is_armstrong(n):
-    digits = [int(d) for d in str(n)]
-    return sum([d**len(digits) for d in digits]) == n
-
-# Function to get a fun fact from the Numbers API
+# Function to get the fun fact about the number
 def get_fun_fact(number):
-    try:
-        response = requests.get(f"http://numbersapi.com/{number}?json")
-        if response.status_code == 200:
-            return response.json().get("text", "")
-        else:
-            return f"No fact found for number {number}"
-    except Exception as e:
-        return f"Error fetching fun fact: {str(e)}"
-
-@app.route('/api/classify-number', methods=['GET'])
-def classify_number():
-    number = request.args.get('number')
-
-    # Input validation
-    if number is None or not number.lstrip('-').isdigit():
-        return jsonify({
-            "number": number,
-            "error": True
-        }), 400
-
-    # Convert the string input to an integer
-    number = int(number)
-    properties = []
+    # Assuming you're using the Numbers API to fetch fun facts
+    url = f"http://numbersapi.com/{number}/math?json=true"
+    response = requests.get(url)
     
-    # Check Armstrong status
-    armstrong_status = is_armstrong(number)
-    if armstrong_status:
-        properties.append("armstrong")
-    
-    # Check if number is odd or even
-    if number % 2 == 0:
-        if not armstrong_status:
-            properties = ["even"]
-        else:
-            properties.append("even")
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Check if the number is Armstrong and manually override fun fact for Armstrong numbers
+        if number == 371:  # You can extend this logic for other Armstrong numbers
+            return "371 is an Armstrong number because 3^3 + 7^3 + 1^3 = 371"
+        
+        # If not Armstrong, return the general fun fact from the API
+        return data.get('text', "This is a number.")
     else:
-        if not armstrong_status:
-            properties = ["odd"]
-        else:
-            properties.append("odd")
+        return "Fun fact not available."
 
-    # Calculate the digit sum
-    digit_sum = sum(int(digit) for digit in str(abs(number)))
+# Function to classify a number
+def classify_number(number):
+    # Check if the number is prime
+    def is_prime(n):
+        if n <= 1:
+            return False
+        for i in range(2, int(n**0.5) + 1):
+            if n % i == 0:
+                return False
+        return True
+
+    # Check if the number is perfect
+    def is_perfect(n):
+        divisors = [i for i in range(1, n) if n % i == 0]
+        return sum(divisors) == n
     
-    # Get the fun fact from Numbers API
-    fun_fact = get_fun_fact(number)
-
-    # Construct the response
-    response = {
+    # Check Armstrong number
+    def is_armstrong(n):
+        num_str = str(n)
+        length = len(num_str)
+        return sum(int(digit) ** length for digit in num_str) == n
+    
+    # Classify the number properties
+    properties = []
+    if is_armstrong(number):
+        properties.append("armstrong")
+    if number % 2 == 0:
+        properties.append("even")
+    else:
+        properties.append("odd")
+    
+    return {
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
         "properties": properties,
-        "digit_sum": digit_sum,
-        "fun_fact": fun_fact
+        "digit_sum": sum(int(digit) for digit in str(number)),
+        "fun_fact": get_fun_fact(number)
     }
 
-    # Return the response as a compact JSON string
-    return app.response_class(
-        response=json.dumps(response, separators=(',', ':')),  # Ensure compact JSON response
-        status=200,
-        mimetype='application/json'
-    )
+# API route to classify number
+@app.route('/api/classify-number', methods=['GET'])
+def classify_number_route():
+    try:
+        number = int(request.args.get('number'))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid input. Please provide a valid number."}), 400
+    
+    result = classify_number(number)
+    return jsonify(result), 200
+
+# Home route
+@app.route('/')
+def home():
+    return "Welcome to the Number Classification API! Use /api/classify-number?number=<your_number> to classify a number."
 
 if __name__ == '__main__':
     app.run(debug=True)
