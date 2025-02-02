@@ -37,7 +37,7 @@ The API supports the following functionality:
 
 
 
-error_handling_content = """
+
 # Error Handling
 
 If an invalid number is provided, the API will return an error message:
