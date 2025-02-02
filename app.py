@@ -62,7 +62,7 @@ def classify_number():
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
         "properties": properties,
-        "digit_sum": digit_sum,
+        "digit_sum": f"{digit_sum}",  # return as string as requested
         "fun_fact": fun_fact
     })
 
