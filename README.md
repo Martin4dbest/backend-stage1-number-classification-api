@@ -44,7 +44,7 @@ If an invalid number is provided, the API will return an error message:
 
 ## Example Error Response:
 
-```json
+
 {
     "number": "abc",
     "error": true
@@ -54,9 +54,7 @@ If an invalid number is provided, the API will return an error message:
 
 # Deployment
 
-This API is deployed on Render. You can access it via the following URL:
-
-[https://number-api.onrender.com/api/classify-number](https://number-api.onrender.com/api/classify-number)
+This API is deployed on Render.
 
 ## How to Run Locally
 
