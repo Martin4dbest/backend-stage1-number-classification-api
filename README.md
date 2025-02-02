@@ -62,8 +62,8 @@ This API is deployed on Render.
 Clone the repository to your local machine:
 
 
-git clone https://github.com/your-username/number-classification-api.git
-cd number-classification-api
+git clone https://github.com/Martin4dbest/devops-stage1-number-classification-api
+cd devops-stage1-number-classification-api
 
 
 
