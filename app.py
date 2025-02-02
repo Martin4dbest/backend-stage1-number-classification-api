@@ -17,6 +17,8 @@ def is_prime(n):
 
 # Function to check if a number is perfect
 def is_perfect(n):
+    if n < 1:
+        return False
     divisors = [i for i in range(1, n) if n % i == 0]
     return sum(divisors) == n
 
@@ -27,61 +29,58 @@ def is_armstrong(n):
 
 # Function to calculate the sum of digits of a number
 def digit_sum(n):
-    return sum(int(d) for d in str(n))
+    return sum(int(d) for d in str(abs(n)))  # Handle negative numbers
 
 # Function to determine if the number is odd or even
 def determine_parity(n):
     return "odd" if n % 2 != 0 else "even"
 
-# Central function to fetch fun fact from Numbers API
+# Fetch fun fact from Numbers API
 def get_fun_fact(n):
     url = f"http://numbersapi.com/{n}?json"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=3)  # Add timeout for reliability
         if response.status_code == 200:
             return response.json().get('text', 'No fun fact available.')
         else:
             return "Fun fact could not be retrieved."
-    except Exception as e:
-        return f"Error fetching fun fact: {str(e)}"
+    except Exception:
+        return "Fun fact could not be retrieved."
 
-# Function to classify the number based on mathematical properties
+# Function to classify number properties
 def classify_number_properties(n):
     properties = []
     
     if is_armstrong(n):
         properties.append("armstrong")
-    
-    # Check if the number is odd or even (not Armstrong)
-    if not is_armstrong(n):
-        properties.append(determine_parity(n))
+    else:
+        properties.append(determine_parity(n))  # Include "odd" or "even"
     
     return properties
 
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
-    # Fetching number from query parameter
-    number = request.args.get('number', type=str)
-    
-    # Input validation for number
-    if not number.isdigit():
+    # Get number from query parameter
+    number_param = request.args.get('number')
+
+    # Validate input: Must be numeric and an integer
+    if not number_param or not number_param.lstrip('-').isdigit():
         response = {
-            "number": number,
             "error": True,
-            "message": "Input is not a valid number."
+            "message": "Invalid input. Please provide a valid integer."
         }
-        return jsonify(response), 200
-    
+        return jsonify(response), 400
+
     # Convert string to integer
-    number = int(number)
-    
-    # Classify the number's properties
+    number = int(number_param)
+
+    # Classify properties
     properties = classify_number_properties(number)
-    
-    # Get the fun fact from Numbers API
+
+    # Get fun fact
     fun_fact = get_fun_fact(number)
-    
-    # Construct the response JSON matching the required format
+
+    # Construct response
     response = {
         "number": number,
         "is_prime": is_prime(number),
@@ -90,7 +89,7 @@ def classify_number():
         "digit_sum": digit_sum(number),
         "fun_fact": fun_fact
     }
-    
+
     return jsonify(response), 200
 
 if __name__ == '__main__':
