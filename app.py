@@ -18,8 +18,8 @@ def is_perfect(n):
     return sum([i for i in range(1, n) if n % i == 0]) == n
 
 def is_armstrong(n):
-    digits = [int(d) for d in str(n)]
-    return sum([d**len(digits) for d in digits]) == n
+    digits = [int(d) for d in str(abs(n))]  # Handle negative numbers correctly
+    return sum([d**len(digits) for d in digits]) == abs(n)
 
 @app.route('/')
 def home():
@@ -29,17 +29,19 @@ def home():
 def classify_number():
     number = request.args.get('number')
 
-    # Check if the input is valid (a valid integer number)
-    if number is None or not number.lstrip('-').isdigit():
+    try:
+        number = float(number)  # Convert input to float first
+        if not number.is_integer():
+            raise ValueError  # Reject non-integer values
+        number = int(number)  # Convert back to int
+    except (ValueError, TypeError):
         return jsonify({
             "number": number,
             "error": True
         }), 400
 
-    number = int(number)
     properties = []
     
-    # Classify the number based on different properties
     if is_prime(number):
         properties.append("prime")
     if is_perfect(number):
@@ -51,30 +53,20 @@ def classify_number():
     else:
         properties.append("odd")
 
-    # Calculate the sum of digits
     digit_sum = sum(int(digit) for digit in str(abs(number)))
 
-    # Fun fact for Armstrong numbers
-    fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(number)]) + f" = {number}" if is_armstrong(number) else "No fact found."
+    fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(abs(number))]) + f" = {number}" if is_armstrong(number) else "No fact found."
 
-    # Create the response dictionary manually in the correct order
     response = {
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
-        "properties": properties,  # In one line, as required
+        "properties": properties,
         "digit_sum": digit_sum,
         "fun_fact": fun_fact
     }
 
-    # Convert the response dictionary to JSON with json.dumps() to ensure the order of the keys
-    json_response = json.dumps(response, indent=4)
-    
-    return app.response_class(
-        response=json_response,
-        status=200,
-        mimetype='application/json'
-    )
+    return jsonify(response), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
