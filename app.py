@@ -1,25 +1,28 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import math
-import json
 
 app = Flask(__name__)
 CORS(app)
 
 def is_prime(n):
-    if n < 2:
+    if n < 2 or not n.is_integer():  # Only whole numbers can be prime
         return False
+    n = int(n)
     for i in range(2, int(math.sqrt(n)) + 1):
         if n % i == 0:
             return False
     return True
 
 def is_perfect(n):
-    return sum([i for i in range(1, n) if n % i == 0]) == n
+    if not n.is_integer():  # Only whole numbers can be perfect
+        return False
+    n = int(n)
+    return sum(i for i in range(1, n) if n % i == 0) == n
 
 def is_armstrong(n):
-    digits = [int(d) for d in str(abs(n))]  # Handle negative numbers correctly
-    return sum([d**len(digits) for d in digits]) == abs(n)
+    digits = [int(d) for d in str(abs(int(n)))]  # Convert to integer before checking
+    return sum(d**len(digits) for d in digits) == abs(int(n))
 
 @app.route('/')
 def home():
@@ -30,15 +33,9 @@ def classify_number():
     number = request.args.get('number')
 
     try:
-        number = float(number)  # Convert input to float first
-        if not number.is_integer():
-            raise ValueError  # Reject non-integer values
-        number = int(number)  # Convert back to int
+        number = float(number)  # Accept both integers and floats
     except (ValueError, TypeError):
-        return jsonify({
-            "number": number,
-            "error": True
-        }), 400
+        return jsonify({"number": number, "error": True}), 400
 
     properties = []
     
@@ -53,9 +50,9 @@ def classify_number():
     else:
         properties.append("odd")
 
-    digit_sum = sum(int(digit) for digit in str(abs(number)))
+    digit_sum = sum(int(digit) for digit in str(abs(int(number))))
 
-    fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(abs(number))]) + f" = {number}" if is_armstrong(number) else "No fact found."
+    fun_fact = f"{int(number)} is an Armstrong number because " + " + ".join([f"{d}^{len(str(int(number)))}" for d in str(abs(int(number)))]) + f" = {int(number)}" if is_armstrong(number) else "No fact found."
 
     response = {
         "number": number,
