@@ -14,14 +14,16 @@ def is_prime(n):
             return False
     return True
 
-
 def is_perfect(n):
     return sum([i for i in range(1, n) if n % i == 0]) == n
-
 
 def is_armstrong(n):
     digits = [int(d) for d in str(n)]
     return sum([d**len(digits) for d in digits]) == n
+
+@app.route('/')
+def home():
+    return "Welcome to the Number Classification API! Use /api/classify-number?number=<your_number> to classify a number."
 
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
@@ -29,7 +31,7 @@ def classify_number():
 
     # Validate input
     if not number or not number.lstrip('-').isdigit():  # Handle negative numbers
-        return jsonify({"number": number, "error": True}), 400
+        return jsonify({"number": number, "error": True, "message": "Invalid number format."}), 400
 
     number = int(number)
     properties = []
