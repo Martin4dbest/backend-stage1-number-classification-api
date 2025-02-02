@@ -4,7 +4,7 @@ import requests
 import math
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app)
 
 def is_prime(n):
     if n < 2:
@@ -27,14 +27,20 @@ def home():
 
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
+    
     number = request.args.get('number')
 
-    # Validate input
-    if not number or not number.lstrip('-').isdigit():  # Handle negative numbers
-        return jsonify({"number": number, "error": True, "message": "Invalid number format."}), 400
+    if number is None or not number.lstrip('-').isdigit():
+        return jsonify({
+            "error": True,
+            "message": "Invalid number format. Please provide a valid number."
+        }), 400  
 
+    # Convert to an integer
     number = int(number)
     properties = []
+    
+    # Check number properties
     if is_prime(number):
         properties.append("prime")
     if is_perfect(number):
@@ -46,25 +52,26 @@ def classify_number():
     else:
         properties.append("odd")
 
-    digit_sum = sum(int(digit) for digit in str(abs(number)))  # Sum of digits
+    digit_sum = sum(int(digit) for digit in str(abs(number)))  
 
-    # Get fun fact from Numbers API
+    
     fun_fact = "No fact found."
     try:
         fun_fact_response = requests.get(f"http://numbersapi.com/{number}/math?json", timeout=5)
         if fun_fact_response.status_code == 200:
             fun_fact = fun_fact_response.json().get("text", fun_fact)
     except requests.exceptions.RequestException:
-        pass  
+        pass
+
 
     return jsonify({
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
         "properties": properties,
-        "digit_sum": f"{digit_sum}",  # return as string as requested
+        "digit_sum": f"{digit_sum}",  
         "fun_fact": fun_fact
-    }), 200  # Explicitly setting status code to 200 for valid input
+    }), 200  # Return a 200 status code for valid input
 
 if __name__ == '__main__':
     app.run(debug=True)
