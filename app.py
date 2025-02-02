@@ -59,20 +59,27 @@ def classify_number():
     digit_sum = sum(int(digit) for digit in str(abs(number)))
     
     # Generate the fun fact (only if the number is Armstrong)
-    fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(number)]) + f" = {number}" if is_armstrong(number) else "No fact found."
+    if is_armstrong(number):
+        fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(number)]) + f" = {number}"
+    else:
+        fun_fact = "No fact found."
 
-    # Construct the response to ensure the order of keys
+    # Construct the response to ensure the order of keys and formatting
     response = {
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
-        "properties": properties,  # Ensure this is on one line
+        "properties": properties,
         "digit_sum": digit_sum,
         "fun_fact": fun_fact
     }
 
-    # Return the response with the correct status code
-    return jsonify(response), 200
+    # Return the response with the correct status code and compact formatting
+    return app.response_class(
+        response=json.dumps(response, separators=(',', ':')),  # compact JSON format
+        status=200,
+        mimetype='application/json'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
