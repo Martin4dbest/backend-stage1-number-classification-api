@@ -21,8 +21,10 @@ def is_perfect(n):
     return sum(i for i in range(1, n) if n % i == 0) == n
 
 def is_armstrong(n):
-    digits = [int(d) for d in str(abs(int(n)))]  # Convert to integer before checking
-    return sum(d**len(digits) for d in digits) == abs(int(n))
+    if n < 0 or not n.is_integer():  # Armstrong numbers are non-negative integers
+        return False
+    digits = [int(d) for d in str(int(n))]  # Convert to integer before checking
+    return sum(d**len(digits) for d in digits) == int(n)
 
 @app.route('/')
 def home():
@@ -35,7 +37,7 @@ def classify_number():
     try:
         number = float(number)  # Accept both integers and floats
     except (ValueError, TypeError):
-        return jsonify({"number": number, "error": True}), 400
+        return jsonify({"error": "Invalid input. Please provide a valid number."}), 400
 
     properties = []
     
@@ -52,7 +54,12 @@ def classify_number():
 
     digit_sum = sum(int(digit) for digit in str(abs(int(number))))
 
-    fun_fact = f"{int(number)} is an Armstrong number because " + " + ".join([f"{d}^{len(str(int(number)))}" for d in str(abs(int(number)))]) + f" = {int(number)}" if is_armstrong(number) else "No fact found."
+    if is_armstrong(number):
+        fun_fact = f"{int(number)} is an Armstrong number because " + " + ".join(
+            [f"{d}^{len(str(int(number)))}" for d in str(abs(int(number)))]
+        ) + f" = {int(number)}"
+    else:
+        fun_fact = "No fact found."
 
     response = {
         "number": number,
