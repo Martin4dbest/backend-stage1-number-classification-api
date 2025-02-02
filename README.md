@@ -52,7 +52,6 @@ If an invalid number is provided, the API will return an error message:
 
 
 
-deployment_content = """
 # Deployment
 
 This API is deployed on Render. You can access it via the following URL:
@@ -64,7 +63,7 @@ This API is deployed on Render. You can access it via the following URL:
 ### Step 1: Clone the Repository
 Clone the repository to your local machine:
 
-```bash
+
 git clone https://github.com/your-username/number-classification-api.git
 cd number-classification-api
 
