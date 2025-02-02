@@ -1,4 +1,4 @@
-# Backend Stage 1: 
+# DevOps Stage 1: 
 
 Create an API that takes a number and returns interesting mathematical properties about it, along with a fun fact.
 
@@ -64,7 +64,7 @@ This API is deployed on Render.
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/Martin4dbest/backend-stage1-number-classification-api
+git clone https://github.com/Martin4dbest/devops-stage1-number-classification-api
 cd backend-stage1-number-classification-api
 
 
