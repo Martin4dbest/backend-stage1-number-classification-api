@@ -1,66 +1,65 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import requests
-import math
 
 app = Flask(__name__)
-CORS(app)
 
 def is_prime(n):
+    """Check if a number is prime."""
     if n < 2:
         return False
-    for i in range(2, int(math.sqrt(n)) + 1):
+    for i in range(2, int(n**0.5) + 1):
         if n % i == 0:
             return False
     return True
 
 def is_perfect(n):
-    return sum([i for i in range(1, n) if n % i == 0]) == n
+    """Check if a number is a perfect number."""
+    if n < 2:
+        return False
+    divisors = [i for i in range(1, n) if n % i == 0]
+    return sum(divisors) == n
 
 def is_armstrong(n):
+    """Check if a number is an Armstrong number."""
     digits = [int(d) for d in str(n)]
-    return sum([d**len(digits) for d in digits]) == n
+    length = len(digits)
+    return sum(d**length for d in digits) == n
 
-@app.route('/')
-def home():
-    return "Welcome to the Number Classification API! Use /api/classify-number?number=<your_number> to classify a number."
-
-@app.route('/api/classify-number', methods=['GET'])
-def classify_number():
-    number = request.args.get('number')
-
-    if number is None or not number.lstrip('-').isdigit():
-        return jsonify({
-            "number": number,
-            "error": True
-        }), 400
-
-    number = int(number)
+def classify_number(n):
+    """Classify a number and return its properties."""
     properties = []
-    
-    if is_prime(number):
+    if is_prime(n):
         properties.append("prime")
-    if is_perfect(number):
+    if is_perfect(n):
         properties.append("perfect")
-    if is_armstrong(number):
+    if is_armstrong(n):
         properties.append("armstrong")
-    if number % 2 == 0:
+    if n % 2 == 0:
         properties.append("even")
     else:
         properties.append("odd")
+    return properties
 
-    digit_sum = sum(int(digit) for digit in str(abs(number)))  
-    
-    fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(number)]) + f" = {number}" if is_armstrong(number) else "No fact found."
+@app.route('/api/classify-number', methods=['GET'])
+def classify_number_api():
+    number = request.args.get('number')
+    if not number or not number.lstrip('-').isdigit():
+        return jsonify({"number": number, "error": True}), 400
+
+    number = int(number)
+    properties = classify_number(number)
+    class_sum = sum(int(d) for d in str(abs(number)))
+    fun_fact_response = requests.get(f"http://numbersapi.com/{number}/math")
+    fun_fact = fun_fact_response.text if fun_fact_response.status_code == 200 else "No fun fact available."
 
     return jsonify({
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
         "properties": properties,
-        "digit_sum": digit_sum,
+        "class_sum": class_sum,
         "fun_fact": fun_fact
-    }), 200
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
