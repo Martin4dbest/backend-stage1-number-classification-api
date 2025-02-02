@@ -38,11 +38,11 @@ The API supports the following functionality:
 
 
 
-# Error Handling
+Error Handling
 
 If an invalid number is provided, the API will return an error message:
 
-## Example Error Response:
+Example Error Response:
 
 
 {
