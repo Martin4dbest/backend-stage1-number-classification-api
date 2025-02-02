@@ -6,6 +6,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
+# Function to check if a number is prime
 def is_prime(n):
     if n < 2:
         return False
@@ -14,9 +15,11 @@ def is_prime(n):
             return False
     return True
 
+# Function to check if a number is perfect
 def is_perfect(n):
     return sum([i for i in range(1, n) if n % i == 0]) == n
 
+# Function to check if a number is Armstrong
 def is_armstrong(n):
     digits = [int(d) for d in str(n)]
     return sum([d**len(digits) for d in digits]) == n
@@ -29,17 +32,18 @@ def home():
 def classify_number():
     number = request.args.get('number')
 
-    # Check if the input is valid (a valid integer number)
+    # Input validation
     if number is None or not number.lstrip('-').isdigit():
         return jsonify({
             "number": number,
             "error": True
         }), 400
 
+    # Convert the string input to an integer
     number = int(number)
     properties = []
     
-    # Classify the number based on different properties
+    # Check properties
     if is_prime(number):
         properties.append("prime")
     if is_perfect(number):
@@ -51,30 +55,24 @@ def classify_number():
     else:
         properties.append("odd")
 
-    # Calculate the sum of digits
+    # Calculate the digit sum
     digit_sum = sum(int(digit) for digit in str(abs(number)))
-
-    # Fun fact for Armstrong numbers
+    
+    # Generate the fun fact (only if the number is Armstrong)
     fun_fact = f"{number} is an Armstrong number because " + " + ".join([f"{d}^{len(str(number))}" for d in str(number)]) + f" = {number}" if is_armstrong(number) else "No fact found."
 
-    # Create the response dictionary manually in the correct order
+    # Construct the response to ensure the order of keys
     response = {
         "number": number,
         "is_prime": is_prime(number),
         "is_perfect": is_perfect(number),
-        "properties": properties,  # Properties should be in one line
+        "properties": properties,  # Ensure this is on one line
         "digit_sum": digit_sum,
         "fun_fact": fun_fact
     }
 
-    # Use json.dumps() to ensure formatting and output properties in one line
-    json_response = json.dumps(response, separators=(',', ':'))
-
-    return app.response_class(
-        response=json_response,
-        status=200,
-        mimetype='application/json'
-    )
+    # Return the response with the correct status code
+    return jsonify(response), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
