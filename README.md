@@ -1,6 +1,6 @@
-# DevOps Stage 1: Number Classification API
+# Backend Stage 1: 
 
-DevOps Stage 1 - Number Classification API
+Create an API that takes a number and returns interesting mathematical properties about it, along with a fun fact.
 
 ## Overview
 
